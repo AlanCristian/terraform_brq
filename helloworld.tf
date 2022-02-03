@@ -59,18 +59,31 @@ resource "aws_route_table_association" "associacao" {
   route_table_id = aws_route_table.rotas_brq.id
 }
 
-resource "aws_security_group" "allow_tls" {
-  name        = "allow_tls"
-  description = "Allow TLS inbound traffic"
-  vpc_id      = aws_vpc.main.id
+resource "aws_security_group" "firewall" {
+  name        = "abrir portas"
+  description = "abrir portas 22 (SSH), 443 (HTTPS e 80 (HTTP))"
+  vpc_id      = aws_vpc.vpc_brq.id
 
   ingress {
-    description      = "TLS from VPC"
+    description      = "HTTPS"
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.main.cidr_block]
-    ipv6_cidr_blocks = [aws_vpc.main.ipv6_cidr_block]
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  ingress {
+    description      = "SSH"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  ingress {
+    description      = "HTTP"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
   }
 
   egress {
@@ -82,9 +95,41 @@ resource "aws_security_group" "allow_tls" {
   }
 
   tags = {
-    Name = "allow_tls"
+    Name = "Dudu"
   }
 }
+
+resource "aws_network_interface" "test" {
+  subnet_id       = aws_subnet..id
+  private_ips     = ["10.0.0.50"]
+  security_groups = [aws_security_group.web.id]
+}
+
+/*resource "aws_eip" "ip_pub" {
+ vpc                       = true
+ network_interface         = aws_network_interface.interface.id
+ associate_with_private_ip = "10.0.1.42"
+ depends_on                = [aws_internet_gateway.gw]
+}*/
+
+/*resource "aws_instance" "hello-world" {
+ ami               = "ami-04505e74c0741db8d"
+ instance_type     = "t2.micro"
+ availability_zone = "us-east-1a"
+  network_interface {
+   device_index         = 0
+   network_interface_id = aws_network_interface.interface.id
+ }
+ user_data = <<-EOF
+               #! /bin/bash
+               sudo apt-get update -y
+               sudo apt-get install -y apache2
+               sudo systemctl start apache2
+               sudo systemctl enable apache2
+               sudo bash -c 'echo "<h1>ESTOU RODANDO</h1>"  > /var/www/html/index.html'
+             EOF
+}*/
+
 
 /*resource "aws_instance" "ola-mundo" {
  ami           = "ami-04505e74c0741db8d"
