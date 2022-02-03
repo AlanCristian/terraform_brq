@@ -20,14 +20,22 @@ resource "aws_vpc" "vpc_brq" {
   }
 }
 
-resource "aws_subnet" "subrede_brq" {
+resource "aws_internet_gateway" "gw_brq" {
+  vpc_id = aws_vpc.vpc_brq.id
+  tags = {
+    Name = "Deyverson"
+  }
+}
+
+/*resource "aws_subnet" "subrede_brq" {
    vpc_id     = aws_vpc.vpc_brq.id
    cidr_block = "10.0.1.0/24"
 
    tags = {
      Name = "RonyRustico"
    }
- }
+ }*/
+
 
 /*resource "aws_instance" "ola-mundo" {
  ami           = "ami-04505e74c0741db8d"
