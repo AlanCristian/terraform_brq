@@ -99,18 +99,22 @@ resource "aws_security_group" "firewall" {
   }
 }
 
-resource "aws_network_interface" "test" {
-  subnet_id       = aws_subnet..id
-  private_ips     = ["10.0.0.50"]
-  security_groups = [aws_security_group.web.id]
+resource "aws_network_interface" "interface_rede" {
+  subnet_id       = aws_subnet.subrede_brq.id
+  private_ips     = ["10.0.1.51"]
+  security_groups = [aws_security_group.firewall.id]
+
+  tags = {
+    Name = "Weverton"
+  }
 }
 
-/*resource "aws_eip" "ip_pub" {
+resource "aws_eip" "ip_publico" {
  vpc                       = true
- network_interface         = aws_network_interface.interface.id
- associate_with_private_ip = "10.0.1.42"
- depends_on                = [aws_internet_gateway.gw]
-}*/
+ network_interface         = aws_network_interface.interface_rede.id
+ associate_with_private_ip = "10.0.1.51"
+ depends_on                = [aws_internet_gateway.gw_brq]
+}
 
 /*resource "aws_instance" "hello-world" {
  ami               = "ami-04505e74c0741db8d"
@@ -129,7 +133,6 @@ resource "aws_network_interface" "test" {
                sudo bash -c 'echo "<h1>ESTOU RODANDO</h1>"  > /var/www/html/index.html'
              EOF
 }*/
-
 
 /*resource "aws_instance" "ola-mundo" {
  ami           = "ami-04505e74c0741db8d"
