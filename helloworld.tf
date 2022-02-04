@@ -12,6 +12,12 @@ provider "aws" {
 
 }
 
+variable "aws_az" {
+ description = "AWS availability zone"
+ type        = string
+ default     = "us-east-1a"
+}
+
 resource "aws_vpc" "vpc_brq" {
   cidr_block = "10.0.0.0/16"
   tags = {
@@ -47,7 +53,7 @@ resource "aws_route_table" "rotas_brq" {
 resource "aws_subnet" "subrede_brq" {
   vpc_id            = aws_vpc.vpc_brq.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = var.aws_az
   tags = {
     Name = "RonyRustico"
   }
@@ -58,6 +64,28 @@ resource "aws_route_table_association" "associacao" {
   route_table_id = aws_route_table.rotas_brq.id
 }
 
+/* Editado por Alan para o Trabalho de Variáveis*/
+
+variable "security_https" {
+ description = "AWS Secutirty Group HTTPS"
+ type        = number
+ default     = 443
+}
+
+variable "security_ssh" {
+ description = "AWS Secutirty Group SSH"
+ type        = number
+ default     = 22
+}
+
+variable "security_http" {
+ description = "AWS Secutirty Group HTTP"
+ type        = number
+ default     = 80
+}
+
+/* Fim da edição para o Trabalho de Variáveis */
+
 resource "aws_security_group" "firewall" {
   name        = "abrir_portas"
   description = "Abrir porta 22 (SSH), 443 (HTTPS) e 80 (HTTP)"
@@ -65,24 +93,24 @@ resource "aws_security_group" "firewall" {
 
   ingress {
     description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
+    from_port   = var.security_https
+    to_port     = var.security_https
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     description = "SSH"
-    from_port   = 22
-    to_port     = 22
+    from_port   = var.security_ssh
+    to_port     = var.security_ssh
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     description = "HTTP"
-    from_port   = 80
-    to_port     = 80
+    from_port   = var.security_http
+    to_port     = var.security_http
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -116,8 +144,11 @@ resource "aws_eip" "ip_publico" {
   depends_on                = [aws_internet_gateway.gw_brq]
 }
 
+output "printar_ip_publico" {
+  value = aws_eip.ip_publico.public_ip
+}
 
-resource "aws_instance" "app_web" {
+/*resource "aws_instance" "app_web" {
   ami               = "ami-04505e74c0741db8d"
   instance_type     = "t2.micro"
   availability_zone = "us-east-1a"
@@ -136,4 +167,4 @@ resource "aws_instance" "app_web" {
   tags = {
     Name = "RaphaelVeiga"
   }
-}
+}*/
